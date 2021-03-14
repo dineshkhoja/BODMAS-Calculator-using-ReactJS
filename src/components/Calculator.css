@@ -1,0 +1,25 @@
+.cardContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card {
+  height: 430px;
+  width: 450px;
+}
+
+.outputScreenContainer {
+  justify-content: end;
+  align-items: end;
+}
+
+.outputScreen {
+  text-align: right;
+  height: 50px;
+}
+
+Button {
+  width: 100%;
+  height: 50px;
+}
