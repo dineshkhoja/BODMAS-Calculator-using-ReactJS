@@ -9,14 +9,14 @@
   width: 450px;
 }
 
-.outputScreenContainer {
-  justify-content: end;
-  align-items: end;
-}
-
 .outputScreen {
   text-align: right;
   height: 50px;
+}
+
+.resultContainer {
+  padding-top: 10px;
+  padding-right: 10px;
 }
 
 Button {
