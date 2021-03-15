@@ -134,7 +134,7 @@ export default class Calculator extends Component {
                 <Button onClick={() => { this.handleInput(9) }} variant="outlined">9</Button>
               </Grid>
               <Grid item xs={3}>
-                <Button onClick={() => { this.handleInput('X') }} title="Muliply" variant="outlined">*</Button>
+                <Button onClick={() => { this.handleInput('*') }} title="Muliply" variant="outlined">X</Button>
               </Grid>
 
               <Grid item xs={3}>
