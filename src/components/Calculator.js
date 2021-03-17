@@ -17,8 +17,8 @@ export default class Calculator extends Component {
 
     this.state = {
       calcResult: "",
-      specialCharsInCalc: ['+', '-', '*', '/'],
       isResultNegative: false,
+      specialCharsInCalc: ['+', '-', '*', '/'],
     };
   }
 
