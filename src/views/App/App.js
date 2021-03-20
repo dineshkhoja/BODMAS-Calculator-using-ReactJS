@@ -39,9 +39,9 @@ export default class App extends Component {
     });
   }
 
-  async handleSwitchTheme(event, newSelectedTheme) {
-    await this.setState({...this.state ,
-      selectedTheme: (newSelectedTheme !== null) ? newSelectedTheme : this.state.selectedTheme
+  handleSwitchTheme(event, newSelectedTheme) {
+    this.setState({
+      selectedTheme: (newSelectedTheme !== null) ? newSelectedTheme : this.state.selectedTheme,
     });
   }
 
