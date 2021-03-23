@@ -13,25 +13,20 @@ import './Calculator.css';
 
 export default class Calculator extends Component {
 
-  constructor(props) {
-    super(props)
+  // Hanle negatioon has to be completed.
 
+  constructor(props) {
+    super(props);
     this.state = {
       calcResult: "0",
+      accumlatorArray: [],
       calcInfo: "",
       isResultNegative: false,
       specialCharsInCalc: ['+', '-', '*', '/'],
+      sciOperators: []
     };
   }
-
-  // TO check if there is extra operator sybol at the end of string
-  verifyLastCharacter() {
-    if (!this.state.specialCharsInCalc.includes(this.state.calcResult.slice(-1))) {
-      return true;
-    }
-    return false;
-  }
-
+  
   // Checking if number of opening and closing brackets are same.
   verifyBrakets(resultString, operation) {
     let bracketsCount = {
@@ -42,6 +37,14 @@ export default class Calculator extends Component {
       return (operation === "verify") ? true : bracketsCount;
     }
     return (operation === "verify") ? false : bracketsCount;
+  }
+
+  // TO check if there is extra operator sybol at the end of string
+  verifyLastCharacter() {
+    if (!this.state.specialCharsInCalc.includes(this.state.calcResult.slice(-1))) {
+      return true;
+    }
+    return false;
   }
 
   // Taking input from calculator.
@@ -319,20 +322,6 @@ export default class Calculator extends Component {
       //   // Using recursion to get done with all the brackets
       //   refinedResultString = (startIndex > -1) ? resultString.slice() : "" + this.getResult(resultString.slice) + (endIndex < resultString.length) ? resultString.slice() : "";
       }
-
-      /* If srtring starts with special character and that is minus(-),
-      * then puting it as <0-> otherwise ignoring it.
-      */
-      // if (this.state.specialCharsInCalc.includes(resultString.charAt(0))) {
-      //   refinedResultString = (resultString.charAt(0) === '-') ? "0-" + resultString.substr(1, resultString.length) : resultString.substr(1, resultString.length);
-      // }
-
-      // let finalResult = eval(refinedResultString);
-      // this.setState({
-      //   calcResult: eval(refinedResultString),
-      // });
-      // let finalResult = ProcessLiteralsArray(getLiteralsArray(resultString));
-      // console.log("Testing--pre--final-----result---------------", this.state.calcResult);
 
       this.ProcessLiteralsArray(this.getLiteralsArray(resultString), (error, result) => {
         this.setState({
