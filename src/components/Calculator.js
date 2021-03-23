@@ -13,8 +13,6 @@ import './Calculator.css';
 
 export default class Calculator extends Component {
 
-  // Hanle negatioon has to be completed.
-
   constructor(props) {
     super(props);
     this.state = {
