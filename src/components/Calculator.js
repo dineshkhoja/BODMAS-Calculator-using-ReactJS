@@ -39,7 +39,7 @@ export default class Calculator extends Component {
     return (operation === "verify") ? false : bracketsCount;
   }
 
-  // TO check if there is extra operator sybol at the end of string
+  // TO check if there is extra operator sybol at the end of string.
   verifyLastCharacter() {
     if (!this.state.specialCharsInCalc.includes(this.state.calcResult.slice(-1))) {
       return true;
