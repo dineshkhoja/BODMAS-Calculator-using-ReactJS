@@ -77,21 +77,21 @@ export default class Calculator extends Component {
       // Not permitting new entry.
     } else if (this.state.resultString.length === 0 && value === '-') {
       this.setState({
-        calcResult: '0' + value, // Adding initial <0> for <->.
+        resultString: '0' + value, // Adding initial <0> for <->.
       });
     }
     // Replacing existing last operator symbol, if we are getting new operator symbol.
     else if (this.state.operatorsArray.includes(value) &&
       this.state.operatorsArray.includes(this.state.resultString.substr(-1))) {
       this.setState({
-        calcResult: (this.state.resultString).slice(0, -1) + value,
+        resultString: (this.state.resultString).slice(0, -1) + value,
       });
     }
     // Finally accepting the input to be added at the last.
     else if (this.state.resultString !== null &&
       this.state.resultString.length < 20) {
       this.setState({
-        calcResult: (this.verifyLastCharacter) ? this.state.resultString + value : this.state.resultString.slice(0, -1) + value,
+        resultString: (this.verifyLastCharacter) ? this.state.resultString + value : this.state.resultString.slice(0, -1) + value,
       });
     } else {
       // As of now letting it be, if required can give info for snackbar.
@@ -101,7 +101,7 @@ export default class Calculator extends Component {
   // To clear result string.
   handleClearScreen() {
     this.setState({
-      calcResult: "0",
+      resultString: "0",
     });
   }
 
@@ -111,7 +111,7 @@ export default class Calculator extends Component {
 
     // let updatedResultString =
     this.setState({
-      calcResult: (this.state.resultString.length === 1) ? "0" :
+      resultString: (this.state.resultString.length === 1) ? "0" :
       (this.state.resultString.slice(-4) === '^(2)') ?
       (this.state.resultString).slice(0, -4)
       : (this.state.resultString).slice(0, -1),
@@ -324,7 +324,7 @@ export default class Calculator extends Component {
       this.ProcessLiteralsArray(this.getLiteralsArray(resultString), (error, result) => {
       // this.ProcessLiteralsArray(this.getLiteralsArray("√17"), (error, result) => {
         this.setState({
-          calcResult: result,
+          resultString: result,
         },() => {
           // console.log("Testing----final-----result---------------", this.state.resultString);
         });
