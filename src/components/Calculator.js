@@ -29,7 +29,7 @@ export default class Calculator extends Component {
       squareEndValidators: ['+', '-', '*', '/', '('],
     };
   }
-  
+
   // Checking if number of opening and closing brackets are same.
   verifyBrakets(resultString, operation) {
     let bracketsCount = {
@@ -80,7 +80,7 @@ export default class Calculator extends Component {
     } else if (this.state.resultString.length === 0 && value === '-') {
       this.setState({
         calcResult: '0' + value, // Adding initial <0> for <->.
-      });   
+      });
     }
     // Replacing existing last operator symbol, if we are getting new operator symbol.
     else if (this.state.operatorsArray.includes(value) &&
@@ -111,7 +111,7 @@ export default class Calculator extends Component {
   handleBackspace() {
     // Handling removing square sign.
 
-    // let updatedResultString = 
+    // let updatedResultString =
     this.setState({
       calcResult: (this.state.resultString.length === 1) ? "0" :
       (this.state.resultString.slice(-4) === '^(2)') ?
@@ -145,7 +145,7 @@ export default class Calculator extends Component {
     let operatorSymbolsArray = this.state.wholeOperators;
     let literalsArray = [];
     let lastSymbolIndex = -1;
-  
+
     for(let i =0; i< resultString.length; i++) {
       let existingSubstr = resultString.slice(i);
 
@@ -205,7 +205,7 @@ export default class Calculator extends Component {
     }
   }
 
-  // Processing square and square root from accumulator. 
+  // Processing square and square root from accumulator.
   processOrders(resultArray, callback) {
 
     // Checking for square and square root.
@@ -233,7 +233,7 @@ export default class Calculator extends Component {
     let intermediateResult;
     switch(operator) {
       case '/':
-        intermediateResult = firstOperand / secondOperand;     
+        intermediateResult = firstOperand / secondOperand;
         break;
       case '*':
         intermediateResult = firstOperand * secondOperand;
@@ -251,7 +251,7 @@ export default class Calculator extends Component {
     return intermediateResult;
   }
 
-  // Processing divide and multiply from accumulator. 
+  // Processing divide and multiply from accumulator.
   processDM(resultArray, callback) {
 
     if (resultArray.includes("/") || resultArray.includes("*")) {
@@ -267,7 +267,7 @@ export default class Calculator extends Component {
     callback(null, resultArray);
   }
 
-  // Processing Add and substract from accumulator. 
+  // Processing Add and substract from accumulator.
   processAS(resultArray, callback) {
 
     if (!resultArray.includes("/") && !resultArray.includes("*")) {
@@ -314,7 +314,7 @@ export default class Calculator extends Component {
     if (resultString.includes('(') || resultString.includes(')')) {
       //   let startIndex = resultString.lastIndexOf('(');
       //   let endIndex = resultString.indexOf(')');
-  
+
       //   // Using recursion to get done with all the brackets
       //   refinedResultString = (startIndex > -1) ? resultString.slice() : "" + this.getResult(resultString.slice) + (endIndex < resultString.length) ? resultString.slice() : "";
     }
