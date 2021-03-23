@@ -17,7 +17,7 @@ export default class Calculator extends Component {
     super(props)
 
     this.state = {
-      calcResult: "",
+      calcResult: "0",
       calcInfo: "",
       isResultNegative: false,
       specialCharsInCalc: ['+', '-', '*', '/'],
@@ -50,54 +50,132 @@ export default class Calculator extends Component {
     let bracketCounts =this.verifyBrakets(this.state.calcResult, "counts");
 
     if (
+      // Not allowing any operator symbol other then <-> or <√> at the starting.
+      (this.state.calcResult.length === 0 && ['^(2)', '/', '*', '+'].includes(value)) ||
+      // Not opening bracket without any previous symbol.
+      (value === '(' && !['/', '*', '+', '-'].includes(this.state.calcResult.slice(-1))) ||
+      // Not adding value after closing bracket without any operator symbol
+      (this.state.calcResult.slice(-1) === ')' && !['/', '*', '+', '-'].includes(value)) ||
+      // Not allowing closing bracket with less number of opening brackets opening bracket.
+      (value === ')' &&
+      ((bracketCounts.openingBracketCount === undefined && bracketCounts.ClosingBracketCount === undefined) ||
+      (bracketCounts.openingBracketCount <= bracketCounts.ClosingBracketCount))) ||
       // Multiple dots(.).
       (value === '.' && this.state.calcResult.slice(-1) === '.') || 
-      // Multiple square symbols (²).
-      (value === '²' && this.state.calcResult.slice(-1) === '²') ||
-      // Direct valie after square symbol (²).
-      (this.state.calcResult.slice(-1) === '²' && !['+', '-', '*', '/', '('].includes(value)) ||
-      (value === '√' && this.state.calcResult.slice(-1) === '√') ||
-      // Direct square root symbol after value.
-      (!['+', '-', '*', '/', ')'].includes(this.state.calcResult.slice(-1)) && value === '√')
+      // Multiple square symbols (^(2)).
+      (value === '^(2)' && this.state.calcResult.slice(-4) === '^(2)') ||
+      // Operator sign before square sign
+      (value === '^(2)' && ['√', '/', '*', '+'].includes(this.state.calcResult.slice(-1))) ||
+      // Direct valie after square symbol (^(2)).
+      (this.state.calcResult.slice(-4) === '^(2)' && !['+', '-', '*', '/', '('].includes(value)) ||
+      // Not allowing square root without any previous operator symbol.
+      (value === '√' && !['/', '*', '+', '-'].includes(this.state.calcResult.slice(-1)))
     ) {
       // Not permitting new entry.
-    } else if (
-      value === ')' &&
-      ((bracketCounts.openingBracketCount === undefined && bracketCounts.ClosingBracketCount === undefined) ||
-      (bracketCounts.openingBracketCount <= bracketCounts.ClosingBracketCount))
-    ) {
-      // If there is opening bracking, not permitting to add closing bracket.
-    } else if (this.state.specialCharsInCalc.includes(value) &&
+    } else if (this.state.calcResult.length === 0 && value === '-') {
+      this.setState({
+        calcResult: '0' + value, // Adding initial <0> for <->.
+      });   
+    }
+    // Replacing existing last operator symbol, if we are getting new operator symbol.
+    else if (this.state.specialCharsInCalc.includes(value) &&
       this.state.specialCharsInCalc.includes(this.state.calcResult.substr(-1))) {
       this.setState({
         calcResult: (this.state.calcResult).slice(0, -1) + value,
       });
-    } else if (this.state.calcResult !== null && 
+    }
+    // Finally accepting the input to be added at the last.
+    else if (this.state.calcResult !== null && 
       this.state.calcResult.length < 20) {
       this.setState({
         calcResult: (this.verifyLastCharacter) ? this.state.calcResult + value : this.state.calcResult.slice(0, -1) + value,
       });
-    }
-     else {
-       // As of now letting it be, if required can give info for snackbar.
+    } else {
+      // As of now letting it be, if required can give info for snackbar.
     }
   }
 
   // To clear result string.
   handleClearScreen() {
     this.setState({
-      calcResult: "",
+      calcResult: "0",
     });
   }
 
   // To remove last character of the result string.
   handleBackspace() {
+    // Handling removing square sign.
     this.setState({
-      calcResult: (this.state.calcResult).slice(0, -1),
+      calcResult: (this.state.calcResult.slice(-4) === '^(2)') ?
+                  (this.state.calcResult).slice(0, -4)
+                  : (this.state.calcResult).slice(0, -1),
     });
   }
 
-  // TO get square of the input.
+  // To make negative or positive result value.
+  handleNegation() {
+
+    if (['+', '-', '*', '/', '(', ')'].includes()) {
+
+    }
+  }
+
+  // To check if String contains any character from the given array.
+  checkForArrayCharactersInString(symbolArray, string) {
+    let containsSymbol = false;
+    for(let i = 0; i < symbolArray.length; i++) {
+      if (string.includes(symbolArray[i])) {
+        containsSymbol = true;
+      }
+    }
+    return containsSymbol;
+  }
+
+  // To get all the operands and operators in result string.
+  getLiteralsArray(resultString) {
+
+    let operatorSymbolsArray = ['^','√' , '/', '*', '+', '-'];
+    let literalsArray = [];
+    let lastSymbolIndex = -1;
+  
+    for(let i =0; i< resultString.length; i++) {
+      let existingSubstr = resultString.slice(i);
+
+      if (operatorSymbolsArray.includes(resultString.charAt(i))) {
+
+        // When first character is under root symbol directly putting it to array.
+        if (resultString.charAt(i) === '√') {
+          lastSymbolIndex = i;
+          literalsArray.push(resultString.charAt(i));
+        }
+        // When symbol is for square
+        else if (resultString.charAt(i) === '^') {
+          let literal1 = resultString.slice(lastSymbolIndex + 1, i);
+          let literal2 = "^(2)";
+          let literal3 = resultString.charAt(i + 4);
+          lastSymbolIndex = i + 4;
+          i += 4;
+          literalsArray.push(literal1, literal2, literal3);
+        } else if (
+          resultString.charAt(i) === '/' ||
+          resultString.charAt(i) === '*' ||
+          resultString.charAt(i) === '+' ||
+          resultString.charAt(i) === '-'
+        ) {
+          let literal1 = resultString.slice(lastSymbolIndex + 1, i);
+          let literal2 = resultString.charAt(i);
+          lastSymbolIndex = i;
+          literalsArray.push(literal1, literal2);
+        }
+      } else if (!this.checkForArrayCharactersInString(operatorSymbolsArray, existingSubstr)) {
+        literalsArray.push(existingSubstr);
+        break;
+      }
+    }
+    return literalsArray;
+  }
+
+  // To get square of the input.
   getSquare(inputValue) {
     return inputValue * inputValue;
   }
@@ -116,33 +194,30 @@ export default class Calculator extends Component {
     }
   }
 
-  // To make negative or positive result value.
-  handleNegation() {
+  // Processing square and square root from accumulator. 
+  processOrders(resultArray, callback) {
 
-    if (['+', '-', '*', '/', '(', ')'].includes()) {
-
-    }
-  }
-
-  // To get list of operators used and respective index in the result string
-  getOperatorsArray(resultString) {
-    let operationsArray = [];
-
-    for (let i=0; i < resultString.length; i++) {
-      let operator = {};
-      if (this.state.specialCharsInCalc.includes(resultString.charAt(i))) {
-        operator = {
-          symbol: resultString.charAt(i),
-          index: i,
+    // Checking for square and square root.
+    if (resultArray.includes("^(2)") || resultArray.includes("√")) {
+      for(let i = 0; i < resultArray.length; i++) {
+        if (resultArray[i] === "^(2)") {
+          let result = this.getSquare(resultArray[i-1]);
+          resultArray.splice(i - 1, 2, result);
+          i--;
+        } else if (resultArray[i] === "√") {
+          let result = this.getFloorSquareRoot(resultArray[i + 1]);
+          resultArray.splice(i, 2, result)
+          i--;
         }
-        operationsArray.push(operator);
       }
     }
-    return operationsArray;
+    callback(null, resultArray);
   }
 
   // To eval one operation
-  evalOperation(firstOperand, operator, secondOperand) {
+  evalOperation(firstOperandP, operator, secondOperandP) {
+    let firstOperand = parseInt(firstOperandP);
+    let secondOperand = parseInt(secondOperandP);
 
     let intermediateResult;
     switch(operator) {
@@ -161,68 +236,111 @@ export default class Calculator extends Component {
       default:
         // Not required...
     }
-    intermediateResult = intermediateResult.toString();
-    if (intermediateResult.slice(-3) === ".00") {
-      return intermediateResult.slice(0, -3);
-    }
+    // intermediateResult = intermediateResult.toString();
+    // if (intermediateResult.slice(-3) === ".00") {
+    //   return intermediateResult.slice(0, -3);
+    // }
     return intermediateResult;
   }
 
-  // To process evaluation for identified operators array.
-  processOperatorsArray(resultString, operationsArray) {
+  // Processing divide and multiply from accumulator. 
+  processDM(resultArray, callback) {
 
-    for (let i = 0; i < operationsArray.length; i++) {
-      if (operationsArray[i].symbol === '√') {
-        resultString = (i === 0) ?
-          this.getFloorSquareRoot(parseFloat(resultString.slice(1, operationsArray[i + 1].index)))
-        : (i < operationsArray.length -1) ?
-          this.getFloorSquareRoot(parseFloat(resultString.slice(operationsArray[i].index + 1, operationsArray[i + 1].index)))
-        :
-        this.getFloorSquareRoot(parseFloat(resultString.slice(operationsArray[i].index + 1)));
-
-        operationsArray.splice(i, 1);
-      } else if (false) {
-
-      } else if (['*', '/'].includes(operationsArray[i].symbol)) {
-
-        if (i === 0) {
-          resultString = "";
-          
-        } else if (i === operationsArray.length - 1) {
-
-        } else {
-
+    if (resultArray.includes("/") || resultArray.includes("*")) {
+      for(let i = 0; i < resultArray.length; i++) {
+        if (resultArray[i] === "/" || resultArray[i] === "*") {
+          let result = this.evalOperation(resultArray[i - 1], resultArray[i], resultArray[i + 1]);
+          resultArray.splice(i - 1, 3, result);
+          i-=2;
         }
       }
     }
+
+    callback(null, resultArray);
   }
 
-  // Getting result for calculator input
-  GetResult(resultString) {
+  // Processing Add and substract from accumulator. 
+  processAS(resultArray, callback) {
 
+    if (!resultArray.includes("/") && !resultArray.includes("*")) {
+      for(let i = 0; i < resultArray.length; i++) {
+        if (resultArray[i] === "+" || resultArray[i] === "-") {
+          let result = this.evalOperation(resultArray[i - 1], resultArray[i], resultArray[i + 1]);
+          resultArray.splice(i - 1, 3, result)
+          i-=2;
+        }
+      }
+    }
+
+    callback(null, resultArray);
+  }
+
+  // Processing eval, if still there are some more oprations are in pending.
+  processPendingEval(resultArray, callback) {
+    if (resultArray.length > 1) {
+      document(null, this.ProcessLiteralsArray(resultArray));
+    } else {
+      let finalResult = resultArray[0];
+      callback(null,finalResult.toString() );
+    }
+  }
+
+  // Processing stored literals to get evaluate dresult.
+  ProcessLiteralsArray(literalsArray, callback) {
+
+    let updatedLiteralsArray = literalsArray;
+
+    this.processOrders(updatedLiteralsArray, (err, result1) => {
+      this.processDM(result1, (err, result2) => {
+        this.processAS(result2, (err, result3) => {
+          this.processPendingEval(result3, (err, result4) => {
+            callback(null, result4);
+          });
+        });
+      });
+    });
+  }
+
+  // Resolving brackets in the result expression.
+  handleBracket(resultString) {
+
+  }
+
+  // Getting result for calculator input.
+  getResult(resultString) {
     // Require to handle square and square root scenarios in the expression.
 
-    let refinedResultString;
+    // let refinedResultString;
     if (this.verifyLastCharacter() && this.verifyBrakets(resultString, "verify")) {
-      // if (resultString.includes('(') || resultString.includes(')')) {
+      if (resultString.includes('(') || resultString.includes(')')) {
       //   let startIndex = resultString.lastIndexOf('(');
       //   let endIndex = resultString.indexOf(')');
   
       //   // Using recursion to get done with all the brackets
-      //   refinedResultString = (startIndex > -1) ? resultString.slice() : "" + this.GetResult(resultString.slice) + (endIndex < resultString.length) ? resultString.slice() : "";
-      // }
+      //   refinedResultString = (startIndex > -1) ? resultString.slice() : "" + this.getResult(resultString.slice) + (endIndex < resultString.length) ? resultString.slice() : "";
+      }
 
       /* If srtring starts with special character and that is minus(-),
       * then puting it as <0-> otherwise ignoring it.
       */
-      if (this.state.specialCharsInCalc.includes(resultString.charAt(0))) {
-        refinedResultString = (resultString.charAt(0) === '-') ? "0-" + resultString.substr(1, resultString.length) : resultString.substr(1, resultString.length);
-      }
+      // if (this.state.specialCharsInCalc.includes(resultString.charAt(0))) {
+      //   refinedResultString = (resultString.charAt(0) === '-') ? "0-" + resultString.substr(1, resultString.length) : resultString.substr(1, resultString.length);
+      // }
 
       // let finalResult = eval(refinedResultString);
       // this.setState({
       //   calcResult: eval(refinedResultString),
       // });
+      // let finalResult = ProcessLiteralsArray(getLiteralsArray(resultString));
+      // console.log("Testing--pre--final-----result---------------", this.state.calcResult);
+
+      this.ProcessLiteralsArray(this.getLiteralsArray(resultString), (error, result) => {
+        this.setState({
+          calcResult: result,
+        },() => {
+          // console.log("Testing----final-----result---------------", this.state.calcResult);
+        });
+      });
     }
   }
 
@@ -287,7 +405,7 @@ export default class Calculator extends Component {
                 <Button onClick={() => { this.handleInput(0) }} variant="outlined">0</Button>
               </Grid>
               <Grid item xs={3}>
-                <Button onClick={() => { this.GetResult(this.state.calcResult) }} variant="outlined">=</Button>
+                <Button onClick={() => { this.getResult(this.state.calcResult) }} variant="outlined">=</Button>
               </Grid>
               <Grid item xs={3}>
                 <Button onClick={() => { this.handleInput('/') }} title="Divide" variant="outlined">/</Button>
@@ -321,7 +439,7 @@ export default class Calculator extends Component {
                     </Grid>
                   }
                   <Grid item xs={4}>
-                    <Button onClick={() => { this.handleInput('²') }} title="Squire" variant="outlined">x ²</Button>
+                    <Button onClick={() => { this.handleInput('^(2)') }} title="Squire" variant="outlined">x²</Button>
                   </Grid>
                   <Grid item xs={4}>
                     <Button onClick={() => { this.handleInput('√') }} title="Square root" variant="outlined">√</Button>
