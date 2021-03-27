@@ -17,6 +17,7 @@ export default class Calculator extends Component {
     super(props);
     this.state = {
       lastOperatorIndex: -1,
+      isLastOperandZero: true,
       resultString: "0",
       resAccumlatorArray: [],
       calcWarningMessage: "",
@@ -25,6 +26,7 @@ export default class Calculator extends Component {
       wholeOperators: ['^', '√', '/', '*', '+', '-'],
       squareStartValidators: ['√', '/', '*', '+'],
       squareEndValidators: ['+', '-', '*', '/', '('],
+      zeroValidators: ['√', '/', '*', '+', '-'],
     };
   }
 
@@ -46,6 +48,16 @@ export default class Calculator extends Component {
       return true;
     }
     return false;
+  }
+
+  // get lastOperatorIndex
+  getLastOperatorIndex(requiredFor) {
+
+  }
+
+  // Getting value for last operand for accumalator
+  getLastOperandForAccum() {
+
   }
 
   // Taking input from calculator.
@@ -72,45 +84,54 @@ export default class Calculator extends Component {
       // Direct valie after square symbol (^(2)).
       (this.state.resultString.slice(-4) === '^(2)' && !this.state.squareEndValidators.includes(value)) ||
       // Not allowing square root without any previous operator symbol.
-      (value === '√' && !this.state.operatorsArray.includes(this.state.resultString.slice(-1)))
+      (value === '√' && !this.state.operatorsArray.includes(this.state.resultString.slice(-1))) ||
+      // If input value is '0' and last operand value is '0', ignoring it.
+      (value === '0' && this.state.isLastOperandZero)
     ) {
       // Not permitting new entry.
-    } else if (this.state.resultString.length === 0 && value === '-') {
-      this.setState({
-        resultString: '0' + value, // Adding initial <0> for <->.
-      });
-    }
-    // Replacing existing last operator symbol, if we are getting new operator symbol.
-    else if (this.state.operatorsArray.includes(value) &&
-      this.state.operatorsArray.includes(this.state.resultString.substr(-1))) {
-      this.setState({
-        resultString: (this.state.resultString).slice(0, -1) + value,
-      });
     }
     // Finally accepting the input to be added at the last.
-    else if (this.state.resultString !== null &&
-      this.state.resultString.length < 20) {
+    else if (this.state.resultString.length < 30) {
+      console.log("Testing-----------------", this.state.isLastOperandZero, "\n", this.state.resAccumlatorArray);
+      let tempAccumalator = this.state.resAccumlatorArray;
+      if (['^(2)', '√', '/', '*', '+', '-'].includes(value)) {
+        tempAccumalator.push(value);
+      } else {
+        tempAccumalator[tempAccumalator.length - 1] = tempAccumalator[tempAccumalator.length - 1] + value;
+      }
       this.setState({
-        resultString: (this.verifyLastCharacter) ? this.state.resultString + value : this.state.resultString.slice(0, -1) + value,
+        lastOperatorIndex: (value === '^(2)') ? this.state.resultString.length + 3
+        : (['√', '/', '*', '+', '-'].includes(value) && this.verifyLastCharacter) ?
+        this.state.resultString.length : this.state.lastOperatorIndex,
+        isLastOperandZero: (value === '0' && ['√', '/', '*', '+', '-'].includes(this.state.resultString.slice(-1))) ?
+        true : false,
+        resultString: ((!this.state.operatorsArray.includes(value) || !this.verifyLastCharacter)
+         ||
+        (this.state.isLastOperandZero && ['.', '-',].includes(value))
+        ) ?
+        this.state.resultString + value
+        : this.state.resultString.slice(0, -1) + value,
+        resAccumlatorArray: tempAccumalator,
       });
-    } else {
-      // As of now letting it be, if required can give info for snackbar.
     }
   }
 
   // To clear result string.
   handleClearScreen() {
+    // Setting up all following states to default.
     this.setState({
+      lastOperatorIndex: -1,
+      isLastOperandZero: true,
       resultString: "0",
     });
   }
 
   // To remove last character of the result string.
   handleBackspace() {
-    // Handling removing square sign.
-
     // let updatedResultString =
     this.setState({
+      lastOperatorIndex: -1, // Need to update loginc here.
+      isLastOperandZero: true, // Need to update loginc here.
       resultString: (this.state.resultString.length === 1) ? "0" :
       (this.state.resultString.slice(-4) === '^(2)') ?
       (this.state.resultString).slice(0, -4)
@@ -137,49 +158,49 @@ export default class Calculator extends Component {
     return containsSymbol;
   }
 
-  // To get all the operands and operators in result string.
-  getLiteralsArray(resultString) {
+  // // To get all the operands and operators in result string.
+  // getLiteralsArray(resultString) {
 
-    let operatorSymbolsArray = this.state.wholeOperators;
-    let literalsArray = [];
-    let lastSymbolIndex = -1;
+  //   let operatorSymbolsArray = this.state.wholeOperators;
+  //   let literalsArray = [];
+  //   let lastSymbolIndex = -1;
 
-    for(let i =0; i< resultString.length; i++) {
-      let existingSubstr = resultString.slice(i);
+  //   for(let i =0; i< resultString.length; i++) {
+  //     let existingSubstr = resultString.slice(i);
 
-      if (operatorSymbolsArray.includes(resultString.charAt(i))) {
+  //     if (operatorSymbolsArray.includes(resultString.charAt(i))) {
 
-        // When first character is under root symbol directly putting it to array.
-        if (resultString.charAt(i) === '√') {
-          lastSymbolIndex = i;
-          literalsArray.push(resultString.charAt(i));
-        }
-        // When symbol is for square
-        else if (resultString.charAt(i) === '^') {
-          let literal1 = resultString.slice(lastSymbolIndex + 1, i);
-          let literal2 = "^(2)";
-          let literal3 = resultString.charAt(i + 4);
-          lastSymbolIndex = i + 4;
-          i += 4;
-          literalsArray.push(literal1, literal2, literal3);
-        } else if (
-          resultString.charAt(i) === '/' ||
-          resultString.charAt(i) === '*' ||
-          resultString.charAt(i) === '+' ||
-          resultString.charAt(i) === '-'
-        ) {
-          let literal1 = resultString.slice(lastSymbolIndex + 1, i);
-          let literal2 = resultString.charAt(i);
-          lastSymbolIndex = i;
-          literalsArray.push(literal1, literal2);
-        }
-      } else if (!this.checkForArrayCharactersInString(operatorSymbolsArray, existingSubstr)) {
-        literalsArray.push(existingSubstr);
-        break;
-      }
-    }
-    return literalsArray;
-  }
+  //       // When first character is under root symbol directly putting it to array.
+  //       if (resultString.charAt(i) === '√') {
+  //         lastSymbolIndex = i;
+  //         literalsArray.push(resultString.charAt(i));
+  //       }
+  //       // When symbol is for square
+  //       else if (resultString.charAt(i) === '^') {
+  //         let literal1 = resultString.slice(lastSymbolIndex + 1, i);
+  //         let literal2 = "^(2)";
+  //         let literal3 = resultString.charAt(i + 4);
+  //         lastSymbolIndex = i + 4;
+  //         i += 4;
+  //         literalsArray.push(literal1, literal2, literal3);
+  //       } else if (
+  //         resultString.charAt(i) === '/' ||
+  //         resultString.charAt(i) === '*' ||
+  //         resultString.charAt(i) === '+' ||
+  //         resultString.charAt(i) === '-'
+  //       ) {
+  //         let literal1 = resultString.slice(lastSymbolIndex + 1, i);
+  //         let literal2 = resultString.charAt(i);
+  //         lastSymbolIndex = i;
+  //         literalsArray.push(literal1, literal2);
+  //       }
+  //     } else if (!this.checkForArrayCharactersInString(operatorSymbolsArray, existingSubstr)) {
+  //       literalsArray.push(existingSubstr);
+  //       break;
+  //     }
+  //   }
+  //   return literalsArray;
+  // }
 
   // To get square of the input.
   getSquare(inputValue) {
@@ -191,11 +212,9 @@ export default class Calculator extends Component {
   getFloorSquareRoot(inputValue) {
 
     let number = parseInt(inputValue);
-
     if (number === 0 || number === 1) {
       return number;
     }
-
     for(let i = 0; i <= number/2; i++) {
       if (i * i > number) {
         return (i - 1);
@@ -245,7 +264,6 @@ export default class Calculator extends Component {
       default:
         // Not required...
     }
-
     return intermediateResult;
   }
 
@@ -261,7 +279,6 @@ export default class Calculator extends Component {
         }
       }
     }
-
     callback(null, resultArray);
   }
 
@@ -277,14 +294,13 @@ export default class Calculator extends Component {
         }
       }
     }
-
     callback(null, resultArray);
   }
 
   // Processing eval, if still there are some more oprations are in pending.
   processPendingEval(resultArray, callback) {
     if (resultArray.length > 1) {
-      document(null, this.ProcessLiteralsArray(resultArray));
+      callback(null, this.ProcessLiteralsArray(resultArray));
     } else {
       let finalResult = resultArray[0];
       callback(null,finalResult.toString() );
@@ -321,6 +337,7 @@ export default class Calculator extends Component {
   // Getting result for calculator input.
   getResult(resultString) {
     if (this.verifyLastCharacter() && this.verifyBrakets(resultString, "verify")) {
+      // this.ProcessLiteralsArray(this.getLiteralsArray(resultString), (error, result) => {
       this.ProcessLiteralsArray(this.getLiteralsArray(resultString), (error, result) => {
       // this.ProcessLiteralsArray(this.getLiteralsArray("√17"), (error, result) => {
         this.setState({
