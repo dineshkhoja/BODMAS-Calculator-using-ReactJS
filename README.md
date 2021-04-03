@@ -1,5 +1,24 @@
-# simple-calculator-using-reactjs
-Simple Calculator using React JS to demonstrate usage of React JS and coding standards.
+# BODMAS Calculator using React JS
+#### Features
+- Basic calculator, which follows BODMAS rule to eval inputs.
+- It supports basic calculations divide, multiply, addition and subtraction.
+- It supports brackets as well for eval expressions.
+
+#### Scientific mode
+- It provides scientific mode for expressions.
+- When you toggle on `scientific mode`, it supports following operations
+  - Negation - making negative or positive last operand in the expression
+  - Square.
+  - Square root - it provides floor value of square root of the operand.
+
+#### Theming
+- It supports dark and light theme for the calculator UI
+- You can toggle between two buttons `light theme` and `dark theme` to change theme of calc UI.
+
+---
+
+
+#### Here continuing with using React JS reference...
 
 # Getting Started with Create React App
 
